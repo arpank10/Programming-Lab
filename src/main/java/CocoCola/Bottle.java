@@ -48,4 +48,12 @@ public class Bottle {
     public void setInGoDown(boolean inGoDown) {
         isInGoDown = inGoDown;
     }
+
+    public BottleType getBottleType() {
+        return bottleType;
+    }
+
+    public void setBottleType(BottleType bottleType) {
+        this.bottleType = bottleType;
+    }
 }
