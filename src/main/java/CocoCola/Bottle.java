@@ -56,4 +56,12 @@ public class Bottle {
     public void setBottleType(BottleType bottleType) {
         this.bottleType = bottleType;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

@@ -1,5 +1,8 @@
 package CocoCola;
 
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+
 public class PackagingUnit {
     private int priority;
     private int localTime;
@@ -24,22 +27,28 @@ public class PackagingUnit {
         return bottle;
     }
 
-    public void runUnit(int timeToObserve){
+    public void runUnit(int timeToObserve, CyclicBarrier cyclicBarrier){
         Thread thread = new Thread(() -> {
             int timeForBottle = 0;
+            Bottle bottle = mainSystem.getNextBottleForPackagingUnit(priority);
             while(localTime <= timeToObserve) {
-                if(timeForBottle == Constants.TIME_TO_PACKAGE){
-                    Bottle bottle = mainSystem.getNextBottleForPackagingUnit(priority);
-                    bottle = packageBottle(bottle);
-                    timeForBottle = 0;
-                    mainSystem.handleBottle(bottle);
-                }
-                if(mainSystem.getGlobalTime() == localTime){
-                    System.out.println("TIME IN LOCAL UNIT = " + localTime+1);
+                try {
                     timeForBottle++;
                     localTime++;
+                    if(timeForBottle == Constants.TIME_TO_PACKAGE && bottle!=null){
+                        bottle = packageBottle(bottle);
+                        boolean bottleHandled = mainSystem.handleBottle(bottle, 1);
+                        timeForBottle = 0;
+                        cyclicBarrier.await();
+                        priority = bottle.getBottleType() == BottleType.B1? 2:1;
+                        bottle = bottleHandled? mainSystem.getNextBottleForPackagingUnit(priority) : bottle;
+                    }
+                    else cyclicBarrier.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (BrokenBarrierException e) {
+                    e.printStackTrace();
                 }
-                mainSystem.setGlobalTime(1);
             }
         });
         thread.start();

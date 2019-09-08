@@ -2,6 +2,7 @@ package Alcher;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MerchandiseSaleSystem {
@@ -10,6 +11,7 @@ public class MerchandiseSaleSystem {
     private List<Order> orders;
     private static final int MAX_BATCH_ORDERS = 3;
     private ConcurrentHashMap<OrderType, Integer> inventory;
+    private CountDownLatch startingLatch, waitingLatch;
 
     public MerchandiseSaleSystem() {
 
@@ -19,7 +21,6 @@ public class MerchandiseSaleSystem {
         //List which contains orders
         orders = new ArrayList<>();
 
-
         initInventory();
 
 
@@ -28,6 +29,20 @@ public class MerchandiseSaleSystem {
         Scanner reader = new Scanner(System.in);
         System.out.println("Number of students ordering: ");
         orderCount = reader.nextInt();
+
+        System.out.println("Input Inventory");
+        System.out.println("Number of Small Tshirts");
+        inventory.put(OrderType.S, reader.nextInt());
+        System.out.println("Number of Medium Tshirts");
+        inventory.put(OrderType.M, reader.nextInt());
+        System.out.println("Number of Large Tshirts");
+        inventory.put(OrderType.L, reader.nextInt());
+        System.out.println("Number of Caps");
+        inventory.put(OrderType.C, reader.nextInt());
+
+        printInventory();
+
+        System.out.println("Enter orders");
 
         try {
             takeOrders(reader);
@@ -46,12 +61,10 @@ public class MerchandiseSaleSystem {
 
     private void takeOrders(Scanner reader) throws InterruptedException {
         for(int i=0;i<orderCount; i++) {
-            printInventory();
             int orderNumber = reader.nextInt();
             String orderTypeSymbol = reader.next();
             OrderType orderType = OrderType.valueOf(orderTypeSymbol);
             int orderQuantity = reader.nextInt();
-
             orders.add(new Order(orderNumber, orderType, orderQuantity));
             if(orders.size() == MAX_BATCH_ORDERS)
                 processOrders();
@@ -61,32 +74,32 @@ public class MerchandiseSaleSystem {
     }
 
     private void processOrders() throws InterruptedException {
-        List<Thread> threads = new ArrayList<>();
         int upperLimit = orderCount > orders.size()? orders.size(): orderCount;
+        int numberOfThreads = upperLimit - processedOrders.get();
+        startingLatch = new CountDownLatch(numberOfThreads);
+        waitingLatch = new CountDownLatch(numberOfThreads);
         for(int i = processedOrders.get();i< upperLimit ;i++) {
             Order order = orders.get(i);
             Thread newThread = new Thread(getNewRunnable(order));
             newThread.start();
-            threads.add(newThread);
+            startingLatch.countDown();
         }
-        for(Thread thread: threads)
-            thread.join();
+        waitingLatch.await();
+
     }
 
     private synchronized void printInventory() {
         List<OrderType> orderTypes = Arrays.asList(OrderType.values());
         synchronized (System.out) {
             for (OrderType orderType : orderTypes) {
-                System.out.print("  |  ");
-                System.out.print(orderType);
+                System.out.print(String.format("%-10s%-10s", "|", orderType));
             }
-            System.out.print("  |");
+            System.out.print("|");
             System.out.println();
             for (OrderType orderType : orderTypes) {
-                System.out.print("  |  ");
-                System.out.print(inventory.get(orderType));
+                System.out.print(String.format("%-10s%-10s", "|", inventory.get(orderType)));
             }
-            System.out.print("  |");
+            System.out.print("|");
             System.out.println();
         }
     }
@@ -99,6 +112,11 @@ public class MerchandiseSaleSystem {
 
     private Runnable getNewRunnable(Order order){
         Runnable runnable = () -> {
+            try {
+                startingLatch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             OrderType orderType = order.getOrderType();
             int orderQuantity = order.getQuantity();
             int quantityPresent = inventory.get(orderType);
@@ -111,6 +129,8 @@ public class MerchandiseSaleSystem {
                 printOrderStatus(order, false);
             }
             processedOrders.incrementAndGet();
+            printInventory();
+            waitingLatch.countDown();
         };
         return runnable;
     }

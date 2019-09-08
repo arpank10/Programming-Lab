@@ -1,5 +1,8 @@
 package CocoCola;
 
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+
 public class SealingUnit {
     private int priority;
     private int localTime;
@@ -7,7 +10,7 @@ public class SealingUnit {
 
 
     public SealingUnit(BottleManufacturingSystem mainSystem){
-        priority = 1;
+        priority = 2;
         localTime = 0;
         this.mainSystem = mainSystem;
     }
@@ -23,22 +26,28 @@ public class SealingUnit {
         return bottle;
     }
 
-    public void runUnit(int timeToObserve){
+
+    public void runUnit(int timeToObserve, CyclicBarrier cyclicBarrier){
         Thread thread = new Thread(() -> {
             int timeForBottle = 0;
+            Bottle bottle = mainSystem.getNextBottleForSealingUnit(priority);
             while(localTime <= timeToObserve) {
-                if(timeForBottle == Constants.TIME_TO_SEAL){
-                    Bottle bottle = mainSystem.getNextBottleForSealingUnit(priority);
-                    bottle = sealBottle(bottle);
-                    timeForBottle = 0;
-                    mainSystem.handleBottle(bottle);
-                }
-                if(mainSystem.getGlobalTime() == localTime){
-                    System.out.println("TIME IN LOCAL UNIT FOR SEALING UNIT = " + localTime+1);
+                try {
                     timeForBottle++;
                     localTime++;
+                    if(timeForBottle == Constants.TIME_TO_SEAL && bottle != null){
+                        bottle = sealBottle(bottle);
+                        boolean bottleHandled = mainSystem.handleBottle(bottle, 2);
+                        timeForBottle = 0;
+                        cyclicBarrier.await();
+                        priority = bottle.getBottleType() == BottleType.B1? 2:1;
+                        bottle = bottleHandled ? mainSystem.getNextBottleForSealingUnit(priority) : bottle;
+                    } else cyclicBarrier.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (BrokenBarrierException e) {
+                    e.printStackTrace();
                 }
-                mainSystem.setGlobalTime(2);
             }
         });
         thread.start();
