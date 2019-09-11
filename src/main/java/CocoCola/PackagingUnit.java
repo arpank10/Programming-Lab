@@ -38,7 +38,7 @@ public class PackagingUnit {
                     if(timeForBottle == Constants.TIME_TO_PACKAGE && bottle!=null){
                         bottle = packageBottle(bottle);
                         boolean bottleHandled = mainSystem.handleBottle(bottle, 1);
-                        timeForBottle = 0;
+                        timeForBottle = bottleHandled?0:Constants.TIME_TO_PACKAGE - 1;
                         cyclicBarrier.await();
                         priority = bottle.getBottleType() == BottleType.B1? 2:1;
                         bottle = bottleHandled? mainSystem.getNextBottleForPackagingUnit(priority) : bottle;

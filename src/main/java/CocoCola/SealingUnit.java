@@ -38,7 +38,7 @@ public class SealingUnit {
                     if(timeForBottle == Constants.TIME_TO_SEAL && bottle != null){
                         bottle = sealBottle(bottle);
                         boolean bottleHandled = mainSystem.handleBottle(bottle, 2);
-                        timeForBottle = 0;
+                        timeForBottle = bottleHandled?0:Constants.TIME_TO_SEAL - 1;
                         cyclicBarrier.await();
                         priority = bottle.getBottleType() == BottleType.B1? 2:1;
                         bottle = bottleHandled ? mainSystem.getNextBottleForSealingUnit(priority) : bottle;

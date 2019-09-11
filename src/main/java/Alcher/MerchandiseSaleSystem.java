@@ -66,7 +66,7 @@ public class MerchandiseSaleSystem {
             OrderType orderType = OrderType.valueOf(orderTypeSymbol);
             int orderQuantity = reader.nextInt();
             orders.add(new Order(orderNumber, orderType, orderQuantity));
-            if(orders.size() == MAX_BATCH_ORDERS)
+            if(orders.size() - processedOrders.get() == MAX_BATCH_ORDERS)
                 processOrders();
         }
         if( processedOrders.get() < orderCount )
@@ -117,21 +117,23 @@ public class MerchandiseSaleSystem {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            OrderType orderType = order.getOrderType();
-            int orderQuantity = order.getQuantity();
-            int quantityPresent = inventory.get(orderType);
-
-            if(quantityPresent >= orderQuantity){
-                inventory.put(orderType, quantityPresent - orderQuantity);
-                printOrderStatus(order, true);
-            }
-            else {
-                printOrderStatus(order, false);
-            }
-            processedOrders.incrementAndGet();
-            printInventory();
-            waitingLatch.countDown();
+            updateInventory(order);
         };
         return runnable;
+    }
+
+    private synchronized void updateInventory(Order order){
+        OrderType orderType = order.getOrderType();
+        int orderQuantity = order.getQuantity();
+        int presentQuantity = inventory.get(orderType);
+        if (presentQuantity>= orderQuantity) {
+            inventory.put(orderType, presentQuantity - orderQuantity);
+            printOrderStatus(order, true);
+        } else {
+            printOrderStatus(order, false);
+        }
+        processedOrders.incrementAndGet();
+        printInventory();
+        waitingLatch.countDown();
     }
 }
