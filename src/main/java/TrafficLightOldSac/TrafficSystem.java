@@ -1,5 +1,6 @@
 package TrafficLightOldSac;
 
+import javax.swing.*;
 import java.util.*;
 import java.util.concurrent.Phaser;
 
@@ -10,17 +11,26 @@ public class TrafficSystem {
     private int globalTime = 0;
     private int currentTrafficLight = 1;
     Phaser phaser;
+    GUI gui;
 
     public TrafficSystem(){
         T1SE = new TrafficLight();
         T2WS = new TrafficLight();
         T3EW = new TrafficLight();
         vehiclesThatDontRequireTrafficLight = new ArrayList<>();
+        gui = new GUI();
 //        phaser = new Phaser(0);
     }
 
     public void startSystem() {
         startTrafficSystem();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Entered");
+                gui.setVisible(true);
+            }
+        });
         takeInput();
     }
 
@@ -86,9 +96,11 @@ public class TrafficSystem {
                     }
                     else timeForASingleVehicle++;
                     globalTime++;
+                    gui.updateTimer(globalTime);
 
                     if(timeForASingleVehicle == Constants.TIME_FOR_VEHICLE_TO_PASS && carToBePassed != null) {
                         getCurrentTrafficLight().handleCarPassing(carToBePassed);
+                        gui.passCar(carToBePassed);
                         System.out.println(String.format("Car %s passed from %s to %s at time %s",
                                 carToBePassed.getId(),
                                 carToBePassed.getSourceDirection(),
@@ -104,6 +116,7 @@ public class TrafficSystem {
                         currentTrafficLight = currentTrafficLight%3 + 1;
                         setTrafficLightStatus();
                         carToBePassed = getCarToPass(getCurrentTrafficLight());
+                        gui.setTrafficLight(currentTrafficLight);
                     }
                 } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -172,6 +185,7 @@ public class TrafficSystem {
             leavingTime += T1SE.getWaitingCarsAtSignal().size() * 6;
             car.setLeavingTime(leavingTime + globalTime);
             T1SE.addCarToWaitingList(car);
+            gui.addCar(car);
         }
         else if(sourceDirection == Direction.WEST && destinationDirection == Direction.SOUTH){
             if(currentTrafficLight == 1) leavingTime+=60 - globalTime%60;
@@ -179,6 +193,7 @@ public class TrafficSystem {
             leavingTime += T2WS.getWaitingCarsAtSignal().size() * 6;
             car.setLeavingTime(leavingTime + globalTime);
             T2WS.addCarToWaitingList(car);
+            gui.addCar(car);
         }
         else if(sourceDirection == Direction.EAST && destinationDirection == Direction.WEST){
             if(currentTrafficLight == 2) leavingTime+=60 - globalTime%60;
@@ -186,21 +201,25 @@ public class TrafficSystem {
             leavingTime += T3EW.getWaitingCarsAtSignal().size() * 6;
             car.setLeavingTime(leavingTime + globalTime);
             T3EW.addCarToWaitingList(car);
+            gui.addCar(car);
         }
         else if(sourceDirection == Direction.SOUTH && destinationDirection == Direction.WEST){
             car.setStatus(1);
             vehiclesThatDontRequireTrafficLight.add(car);
             car.setLeavingTime(leavingTime + globalTime);
+            gui.addCar(car);
         }
         else if(sourceDirection == Direction.EAST && destinationDirection == Direction.SOUTH){
             car.setStatus(1);
             vehiclesThatDontRequireTrafficLight.add(car);
             car.setLeavingTime(leavingTime + globalTime);
+            gui.addCar(car);
         }
         else if(sourceDirection == Direction.WEST && destinationDirection == Direction.EAST){
             car.setStatus(1);
             vehiclesThatDontRequireTrafficLight.add(car);
             car.setLeavingTime(leavingTime + globalTime);
+            gui.addCar(car);
         }
         else {
             System.out.println(Constants.WRONG_DIRECTION_FORMAT);
