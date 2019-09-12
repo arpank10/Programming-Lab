@@ -30,20 +30,20 @@ public class PackagingUnit {
     public void runUnit(int timeToObserve, CyclicBarrier cyclicBarrier){
         Thread thread = new Thread(() -> {
             int timeForBottle = 0;
-            Bottle bottle = mainSystem.getNextBottleForPackagingUnit(priority);
+            Bottle bottle = null;
             while(localTime <= timeToObserve) {
                 try {
+                    if(timeForBottle == 0)
+                        bottle = mainSystem.getNextBottleForPackagingUnit(priority);
                     timeForBottle++;
                     localTime++;
-                    if(timeForBottle == Constants.TIME_TO_PACKAGE && bottle!=null){
+                    if(timeForBottle == Constants.TIME_TO_PACKAGE){
                         bottle = packageBottle(bottle);
                         boolean bottleHandled = mainSystem.handleBottle(bottle, 1);
                         timeForBottle = bottleHandled?0:Constants.TIME_TO_PACKAGE - 1;
-                        cyclicBarrier.await();
                         priority = bottle.getBottleType() == BottleType.B1? 2:1;
-                        bottle = bottleHandled? mainSystem.getNextBottleForPackagingUnit(priority) : bottle;
                     }
-                    else cyclicBarrier.await();
+                    cyclicBarrier.await();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (BrokenBarrierException e) {

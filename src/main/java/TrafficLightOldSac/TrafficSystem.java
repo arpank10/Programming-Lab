@@ -12,9 +12,9 @@ public class TrafficSystem {
     Phaser phaser;
 
     public TrafficSystem(){
-        T1SE = new TrafficLight(Direction.SOUTH, Direction.EAST);
-        T2WS = new TrafficLight(Direction.WEST, Direction.SOUTH);
-        T3EW = new TrafficLight(Direction.EAST, Direction.WEST);
+        T1SE = new TrafficLight();
+        T2WS = new TrafficLight();
+        T3EW = new TrafficLight();
         vehiclesThatDontRequireTrafficLight = new ArrayList<>();
 //        phaser = new Phaser(0);
     }

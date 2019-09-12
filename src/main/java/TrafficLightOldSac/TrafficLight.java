@@ -4,34 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TrafficLight {
-    private Direction sourceDirectionItHandles;
-    private Direction destinationDirectionItHandles;
     private int currentLight; //Red 0 Green 1
     private List<Car> waitingCarsAtSignal;
     private List<Car> passedCarsAtSignal;
 
-    public TrafficLight(Direction sourceDirectionItHandles, Direction destinationDirectionItHandles) {
-        this.sourceDirectionItHandles = sourceDirectionItHandles;
-        this.destinationDirectionItHandles = destinationDirectionItHandles;
+    public TrafficLight() {
         this.currentLight = 0;
         this.waitingCarsAtSignal = new ArrayList<>();
         this.passedCarsAtSignal = new ArrayList<>();
-    }
-
-    public Direction getSourceDirectionItHandles() {
-        return sourceDirectionItHandles;
-    }
-
-    public void setSourceDirectionItHandles(Direction sourceDirectionItHandles) {
-        this.sourceDirectionItHandles = sourceDirectionItHandles;
-    }
-
-    public Direction getDestinationDirectionItHandles() {
-        return destinationDirectionItHandles;
-    }
-
-    public void setDestinationDirectionItHandles(Direction destinationDirectionItHandles) {
-        this.destinationDirectionItHandles = destinationDirectionItHandles;
     }
 
     public int getCurrentLight() {

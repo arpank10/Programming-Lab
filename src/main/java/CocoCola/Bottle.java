@@ -1,5 +1,7 @@
 package CocoCola;
 
+
+//POJO for Bottle, contains private members and their getters and setters
 public class Bottle {
     private int id;
     private BottleType bottleType;
