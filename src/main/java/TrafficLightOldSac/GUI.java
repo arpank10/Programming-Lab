@@ -81,7 +81,7 @@ public class GUI extends JFrame implements EventListener{
 
 
         Font currentFont = g2d.getFont();
-        Font newFont = currentFont.deriveFont(currentFont.getSize() * 0.5F);
+        Font newFont = currentFont.deriveFont(15.0F);
         g2d.setFont(newFont);
         FontMetrics fontMetrics = g2d.getFontMetrics();
         g2d.setColor(Color.BLACK);
@@ -157,17 +157,17 @@ public class GUI extends JFrame implements EventListener{
         }
 
         for(int i = 0;i<S2W.size();i++){
-            drawACar(g2d, S2W.get(i), leftVerticalX + paddingFromLane, bottomHorizontalY + i*paddingFromCar + i*Constants.WIDTH_OF_CAR
+            drawACar(g2d, S2W.get(i), leftVerticalX + paddingFromLane, bottomHorizontalY + i*paddingFromCar + i*Constants.LENGTH_OF_CAR
                     , Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR  );
         }
         for(int i = 0;i<S2E.size();i++){
-            drawACar(g2d, S2E.get(i), leftVerticalX + 2*paddingFromLane + Constants.WIDTH_OF_CAR, bottomHorizontalY + i*paddingFromCar + i*Constants.WIDTH_OF_CAR
+            drawACar(g2d, S2E.get(i), leftVerticalX + 2*paddingFromLane + Constants.WIDTH_OF_CAR, bottomHorizontalY + i*paddingFromCar + i*Constants.LENGTH_OF_CAR
                     , Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR  );
         }
 
         n = passedToS.size();
         for(int i = n-1;i>=0;i--){
-            drawACar(g2d, passedToS.get(i), leftVerticalX + 3*paddingFromLane + 2*Constants.WIDTH_OF_CAR, bottomHorizontalY + (n-i-1)*paddingFromCar + (n-i-1)*Constants.WIDTH_OF_CAR
+            drawACar(g2d, passedToS.get(i), leftVerticalX + 3*paddingFromLane + 2*Constants.WIDTH_OF_CAR, bottomHorizontalY + (n-i-1)*paddingFromCar + (n-i-1)*Constants.LENGTH_OF_CAR
                     , Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR  );
         }
     }
@@ -183,7 +183,7 @@ public class GUI extends JFrame implements EventListener{
 
         g2d.setColor(Color.BLACK);
         Font currentFont = g2d.getFont();
-        Font newFont = currentFont.deriveFont(currentFont.getSize() * 0.5F);
+        Font newFont = currentFont.deriveFont(15.0F);
         g2d.setFont(newFont);
         FontMetrics fontMetrics = g2d.getFontMetrics();
         int totalWidthOfString = fontMetrics.stringWidth(id);

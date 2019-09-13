@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aed961cd-3b78-4b3a-9c98-17fbe392b2c2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/EventListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/EventListener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/GUI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/TrafficSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/TrafficSystem.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -29,50 +29,32 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/TrafficLightOldSac/GUI.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="90" column="105" selection-start-line="90" selection-start-column="105" selection-end-line="90" selection-end-column="105" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="jar://C:/Program Files/Android/Android Studio/jre/jre/lib/rt.jar!/java/awt/Component.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="130">
-              <caret line="1415" column="16" selection-start-line="1415" selection-start-column="16" selection-end-line="1415" selection-end-column="16" />
-              <folding>
-                <element signature="e#43372#43373#0" expanded="true" />
-                <element signature="e#43435#43436#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/TrafficLightOldSac/Constants.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="11" column="46" selection-start-line="11" selection-start-column="46" selection-end-line="11" selection-end-column="46" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/TrafficLightOldSac/TrafficSystem.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-937">
-              <caret line="156" column="23" lean-forward="true" selection-start-line="156" selection-start-column="23" selection-end-line="156" selection-end-column="23" />
+            <state relative-caret-position="383">
+              <caret line="154" selection-start-line="154" selection-end-line="154" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#5008#5009#0" expanded="true" />
+                <element signature="e#5062#5063#0" expanded="true" />
                 <element signature="method#setTrafficLightStatus#0;class#TrafficSystem#0" />
+                <element signature="method#getCurrentTrafficLight#0;class#TrafficSystem#0" />
                 <element signature="method#getDirection#0;class#TrafficSystem#0" />
                 <element signature="method#printTrafficLightStatus#0;class#TrafficSystem#0" />
+                <element signature="method#printCarStatus#0;class#TrafficSystem#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/TrafficLightOldSac/GUI.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="85">
+              <caret line="83" selection-start-line="83" selection-end-line="83" />
+              <folding>
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -123,9 +105,9 @@
         <option value="$PROJECT_DIR$/src/main/java/CocoCola/PackagingUnit.java" />
         <option value="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/TrafficSystemController.java" />
         <option value="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/GUIHelper.java" />
-        <option value="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/TrafficSystem.java" />
         <option value="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/Constants.java" />
         <option value="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/EventListener.java" />
+        <option value="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/TrafficSystem.java" />
         <option value="$PROJECT_DIR$/src/main/java/TrafficLightOldSac/GUI.java" />
       </list>
     </option>
@@ -547,19 +529,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/TrafficLightOldSac/TrafficSystem.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-937">
-          <caret line="156" column="23" lean-forward="true" selection-start-line="156" selection-start-column="23" selection-end-line="156" selection-end-column="23" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#setTrafficLightStatus#0;class#TrafficSystem#0" />
-            <element signature="method#getDirection#0;class#TrafficSystem#0" />
-            <element signature="method#printTrafficLightStatus#0;class#TrafficSystem#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/TrafficLightOldSac/EventListener.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
@@ -592,10 +561,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/TrafficLightOldSac/TrafficSystem.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="383">
+          <caret line="154" selection-start-line="154" selection-end-line="154" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#5008#5009#0" expanded="true" />
+            <element signature="e#5062#5063#0" expanded="true" />
+            <element signature="method#setTrafficLightStatus#0;class#TrafficSystem#0" />
+            <element signature="method#getCurrentTrafficLight#0;class#TrafficSystem#0" />
+            <element signature="method#getDirection#0;class#TrafficSystem#0" />
+            <element signature="method#printTrafficLightStatus#0;class#TrafficSystem#0" />
+            <element signature="method#printCarStatus#0;class#TrafficSystem#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/TrafficLightOldSac/GUI.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="90" column="105" selection-start-line="90" selection-start-column="105" selection-end-line="90" selection-end-column="105" />
+        <state relative-caret-position="85">
+          <caret line="83" selection-start-line="83" selection-end-line="83" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

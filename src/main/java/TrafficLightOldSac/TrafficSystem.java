@@ -6,7 +6,7 @@ import java.util.concurrent.Phaser;
 
 public class TrafficSystem {
     private TrafficLight T1SE, T2WS, T3EW;
-    private List<Car> vehiclesThatDontRequireTrafficLight;
+    private List<Car> S2W, E2S, W2E;
     private int globalCarId = 0;
     private int globalTime = 0;
     private int currentTrafficLight = 1;
@@ -17,7 +17,9 @@ public class TrafficSystem {
         T1SE = new TrafficLight();
         T2WS = new TrafficLight();
         T3EW = new TrafficLight();
-        vehiclesThatDontRequireTrafficLight = new ArrayList<>();
+        S2W = new ArrayList<>();
+        E2S = new ArrayList<>();
+        W2E = new ArrayList<>();
         gui = new GUI();
 //        phaser = new Phaser(0);
     }
@@ -86,6 +88,7 @@ public class TrafficSystem {
                 try {
                     Thread.sleep(1000);
 //                    phaser.arriveAndAwaitAdvance();
+                    passCarsThatDontRequireSignal();
                     if(carToBePassed == null){
                         carToBePassed = getCarToPass(getCurrentTrafficLight());
                         if(carToBePassed != null){
@@ -128,10 +131,36 @@ public class TrafficSystem {
         trafficLightThread.start();
     }
 
+    private void passCarsThatDontRequireSignal(){
+        for(Car car:S2W){
+            if(car.getLeavingTime() == globalTime){
+                car.setStatus(1);
+                gui.passCar(car);
+            }
+            else if(car.getLeavingTime() > globalTime)
+                break;
+        }
+        for(Car car:E2S){
+            if(car.getLeavingTime() == globalTime){
+                car.setStatus(1);
+                gui.passCar(car);
+            }
+            else if(car.getLeavingTime() > globalTime)
+                break;
+        }
+        for(Car car:W2E){
+            if(car.getLeavingTime() == globalTime){
+                car.setStatus(1);
+                gui.passCar(car);
+            }
+            else if(car.getLeavingTime() > globalTime)
+                break;
+        }
+    }
+
 
     private Car getCarToPass(TrafficLight trafficLight) {
-        Car carToBePassed = trafficLight.getNextCarToPass();
-        return carToBePassed;
+        return trafficLight.getNextCarToPass();
     }
 
     private void setTrafficLightStatus() {
@@ -204,21 +233,18 @@ public class TrafficSystem {
             gui.addCar(car);
         }
         else if(sourceDirection == Direction.SOUTH && destinationDirection == Direction.WEST){
-            car.setStatus(1);
-            vehiclesThatDontRequireTrafficLight.add(car);
-            car.setLeavingTime(leavingTime + globalTime);
+            car.setLeavingTime(leavingTime + S2W.size()*6 + globalTime);
+            S2W.add(car);
             gui.addCar(car);
         }
         else if(sourceDirection == Direction.EAST && destinationDirection == Direction.SOUTH){
-            car.setStatus(1);
-            vehiclesThatDontRequireTrafficLight.add(car);
-            car.setLeavingTime(leavingTime + globalTime);
+            car.setLeavingTime(leavingTime + E2S.size()*6 + globalTime);
+            E2S.add(car);
             gui.addCar(car);
         }
         else if(sourceDirection == Direction.WEST && destinationDirection == Direction.EAST){
-            car.setStatus(1);
-            vehiclesThatDontRequireTrafficLight.add(car);
-            car.setLeavingTime(leavingTime + globalTime);
+            car.setLeavingTime(leavingTime + W2E.size()*6 + globalTime);
+            W2E.add(car);
             gui.addCar(car);
         }
         else {
@@ -247,7 +273,9 @@ public class TrafficSystem {
     private void printCarStatus() {
         System.out.println("-----------------------------------CAR STATUS--------------------------------------");
         System.out.println(String.format("%-20s %-20s %-20s %-20s %-20s","VEHICLE", "SOURCE", "DESTINATION", "STATUS", "REMAINING TIME"));
-        List<Car> allCars = vehiclesThatDontRequireTrafficLight;
+        List<Car> allCars = S2W;
+        allCars.addAll(E2S);
+        allCars.addAll(W2E);
         allCars.addAll(T1SE.getWaitingCarsAtSignal());
         allCars.addAll(T1SE.getPassedCarsAtSignal());
         allCars.addAll(T2WS.getWaitingCarsAtSignal());
