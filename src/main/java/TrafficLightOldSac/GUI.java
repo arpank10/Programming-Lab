@@ -1,5 +1,6 @@
 package TrafficLightOldSac;
 
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -58,10 +59,45 @@ public class GUI extends JFrame implements EventListener{
         g2d.drawLine(leftVerticalX, bottomHorizontalY, leftVerticalX, 800);
         g2d.drawLine(rightVerticalX, bottomHorizontalY, rightVerticalX, 800);
 
+        //Traffic Lights
         drawTrafficLights(g2d);
+
+        //Timer
         drawTimer(g2d);
+
+        //Drawing Cars
         renderCars(g2d);
-//        g2d.drawString("TIME " + );
+
+        //Draw Legends
+        drawLegends(g2d);
+    }
+
+    void drawLegends(Graphics2D g2d) {
+        g2d.drawRect(750 - paddingFromCar - Constants.LENGTH_OF_CAR, 25 + paddingFromLane + Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR);
+        g2d.setColor(Color.GREEN);
+        g2d.drawRect(750 - paddingFromCar - Constants.LENGTH_OF_CAR, 25 + 2*paddingFromLane + 2*Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR);
+        g2d.setColor(Color.BLUE);
+        g2d.drawRect(750 - paddingFromCar - Constants.LENGTH_OF_CAR, 25 + 3*paddingFromLane + 3*Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR);
+
+
+        Font currentFont = g2d.getFont();
+        Font newFont = currentFont.deriveFont(currentFont.getSize() * 0.5F);
+        g2d.setFont(newFont);
+        FontMetrics fontMetrics = g2d.getFontMetrics();
+        g2d.setColor(Color.BLACK);
+        String legend = "Waiting";
+        int totalWidthOfString = fontMetrics.stringWidth(legend);
+        int heightOfLabel = 25 + paddingFromLane + Constants.WIDTH_OF_CAR + fontMetrics.getAscent();
+        g2d.drawString(legend,740 - totalWidthOfString - paddingFromCar - Constants.LENGTH_OF_CAR, heightOfLabel );
+        legend = "Passing";
+        totalWidthOfString = fontMetrics.stringWidth(legend);
+        heightOfLabel += paddingFromLane + Constants.WIDTH_OF_CAR;
+        g2d.drawString(legend,740 - totalWidthOfString - paddingFromCar - Constants.LENGTH_OF_CAR, heightOfLabel);
+        legend = "Passed";
+        totalWidthOfString = fontMetrics.stringWidth(legend);
+        heightOfLabel += paddingFromLane + Constants.WIDTH_OF_CAR;
+        g2d.drawString(legend,740 - totalWidthOfString - paddingFromCar - Constants.LENGTH_OF_CAR, heightOfLabel);
+
     }
 
     void drawTrafficLights(Graphics2D g2d){
@@ -92,79 +128,70 @@ public class GUI extends JFrame implements EventListener{
 
     void renderCars(Graphics2D g2d) {
         for(int i = 0;i<W2E.size();i++){
-            if(W2E.get(i).getLeavingTime() - globalTime <= 6)
-                g2d.setColor(Color.GREEN);
-            //West top lane 1
-            g2d.drawRect(leftVerticalX - (i+1)*Constants.LENGTH_OF_CAR - i*paddingFromCar, topHorizontalY + paddingFromLane,
+            drawACar(g2d, W2E.get(i),leftVerticalX - (i+1)*Constants.LENGTH_OF_CAR - i*paddingFromCar, topHorizontalY + paddingFromLane,
                     Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR );
-            g2d.setColor(Color.BLACK);
         }
 
         for(int i = 0;i<W2S.size();i++){
-            if(W2S.get(i).getLeavingTime() - globalTime <= 6)
-                g2d.setColor(Color.GREEN);
-            //West top lane2
-            g2d.drawRect(leftVerticalX - (i+1)*Constants.LENGTH_OF_CAR - i*paddingFromCar, topHorizontalY + 2*paddingFromLane+ Constants.WIDTH_OF_CAR
+            drawACar(g2d, W2S.get(i), leftVerticalX - (i+1)*Constants.LENGTH_OF_CAR - i*paddingFromCar, topHorizontalY + 2*paddingFromLane+ Constants.WIDTH_OF_CAR
                     , Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR );
-            g2d.setColor(Color.BLACK);
         }
         int n = passedToW.size();
         for(int i = n-1;i>=0;i--){
-            g2d.setColor(Color.GREEN);
-            //West top lane 3
-            g2d.drawRect(leftVerticalX - (n-i)*Constants.LENGTH_OF_CAR - (n-i-1)*paddingFromCar, topHorizontalY + 3*paddingFromLane+ 2*Constants.WIDTH_OF_CAR
+            drawACar(g2d, passedToW.get(i), leftVerticalX - (n-i)*Constants.LENGTH_OF_CAR - (n-i-1)*paddingFromCar, topHorizontalY + 3*paddingFromLane+ 2*Constants.WIDTH_OF_CAR
                     , Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR );
         }
         for(int i = 0;i<E2S.size();i++){
-            if(E2S.get(i).getLeavingTime() - globalTime <= 6)
-                g2d.setColor(Color.GREEN);
-            //East bottom lane 1
-            g2d.drawRect(rightVerticalX + i*Constants.LENGTH_OF_CAR + i*paddingFromCar, bottomHorizontalY - paddingFromLane - Constants.WIDTH_OF_CAR
+            drawACar(g2d, E2S.get(i), rightVerticalX + i*Constants.LENGTH_OF_CAR + i*paddingFromCar, bottomHorizontalY - paddingFromLane - Constants.WIDTH_OF_CAR
                     , Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR );
-            g2d.setColor(Color.BLACK);
         }
         for(int i = 0;i<E2W.size();i++){
-            if(E2W.get(i).getLeavingTime() - globalTime <= 6)
-                g2d.setColor(Color.BLUE);
-            //East bottom lane 2
-            g2d.drawRect(rightVerticalX + i*Constants.LENGTH_OF_CAR + i*paddingFromCar, bottomHorizontalY - 2*paddingFromLane - 2*Constants.WIDTH_OF_CAR
+            drawACar(g2d, E2W.get(i), rightVerticalX + i*Constants.LENGTH_OF_CAR + i*paddingFromCar, bottomHorizontalY - 2*paddingFromLane - 2*Constants.WIDTH_OF_CAR
                     , Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR );
-            g2d.setColor(Color.BLACK);
         }
 
         n = passedToE.size();
         for(int i = n-1;i>=0;i--){
-            g2d.setColor(Color.BLUE);
-            //East bottom lane 3
-            g2d.drawRect(rightVerticalX + (n-i-1)*Constants.LENGTH_OF_CAR + (n-i-1)*paddingFromCar, bottomHorizontalY - 3*paddingFromLane - 3*Constants.WIDTH_OF_CAR
-                    , Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR );
+            drawACar(g2d, passedToE.get(i), rightVerticalX + (n-i-1)*Constants.LENGTH_OF_CAR + (n-i-1)*paddingFromCar, bottomHorizontalY - 3*paddingFromLane - 3*Constants.WIDTH_OF_CAR
+                    , Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR  );
         }
 
         for(int i = 0;i<S2W.size();i++){
-            if(S2W.get(i).getLeavingTime() - globalTime <= 6)
-                g2d.setColor(Color.GREEN);
-            //South left lane 1
-            g2d.drawRect(leftVerticalX + paddingFromLane, bottomHorizontalY + i*paddingFromCar + i*Constants.WIDTH_OF_CAR
-                    , Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR );
-            g2d.setColor(Color.BLACK);
+            drawACar(g2d, S2W.get(i), leftVerticalX + paddingFromLane, bottomHorizontalY + i*paddingFromCar + i*Constants.WIDTH_OF_CAR
+                    , Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR  );
         }
         for(int i = 0;i<S2E.size();i++){
-            if(S2E.get(i).getLeavingTime() - globalTime <= 6)
-                g2d.setColor(Color.GREEN);
-            //South left lane 2
-            g2d.drawRect(leftVerticalX + 2*paddingFromLane + Constants.WIDTH_OF_CAR, bottomHorizontalY + i*paddingFromCar + i*Constants.WIDTH_OF_CAR
-                    , Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR );
-            g2d.setColor(Color.BLACK);
+            drawACar(g2d, S2E.get(i), leftVerticalX + 2*paddingFromLane + Constants.WIDTH_OF_CAR, bottomHorizontalY + i*paddingFromCar + i*Constants.WIDTH_OF_CAR
+                    , Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR  );
         }
-
 
         n = passedToS.size();
         for(int i = n-1;i>=0;i--){
-            g2d.setColor(Color.BLUE);
-            //South left lane 3
-            g2d.drawRect(leftVerticalX + 3*paddingFromLane + 2*Constants.WIDTH_OF_CAR, bottomHorizontalY + (n-i-1)*paddingFromCar + (n-i-1)*Constants.WIDTH_OF_CAR
-                    , Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR );
+            drawACar(g2d, passedToS.get(i), leftVerticalX + 3*paddingFromLane + 2*Constants.WIDTH_OF_CAR, bottomHorizontalY + (n-i-1)*paddingFromCar + (n-i-1)*Constants.WIDTH_OF_CAR
+                    , Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR  );
         }
+    }
+
+    private void drawACar(Graphics2D g2d, Car car, int x, int y, int length, int width){
+        if(car.getLeavingTime() - globalTime <0)
+            g2d.setColor(Color.BLUE);
+        else if(car.getLeavingTime() - globalTime <= 6)
+            g2d.setColor(Color.GREEN);
+
+        g2d.drawRect(x, y, length, width);
+        String id = String.valueOf(car.getId());
+
+        g2d.setColor(Color.BLACK);
+        Font currentFont = g2d.getFont();
+        Font newFont = currentFont.deriveFont(currentFont.getSize() * 0.5F);
+        g2d.setFont(newFont);
+        FontMetrics fontMetrics = g2d.getFontMetrics();
+        int totalWidthOfString = fontMetrics.stringWidth(id);
+
+        int idX = x + (length - totalWidthOfString) / 2;
+        int idY = y + (width - fontMetrics.getHeight())/2 + fontMetrics.getAscent();
+
+        g2d.drawString(id, idX, idY);
     }
 
 
@@ -258,7 +285,7 @@ public class GUI extends JFrame implements EventListener{
     public void updateTimer(int globalTime) {
         if(this.globalTime != globalTime){
             this.globalTime = globalTime;
-            repaint();
+            repaint(0, 0, 200, 200);
         }
     }
 }
