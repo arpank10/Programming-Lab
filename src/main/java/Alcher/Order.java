@@ -1,6 +1,7 @@
 package Alcher;
 
 //POJO for order
+//Contains the attributes (private members) of the Order Class and the corresponding getter and setter functions
 public class Order {
 
     private int orderNumber;
