@@ -2,19 +2,38 @@ package TrafficLightOldSac;
 
 import javax.swing.*;
 import java.util.*;
+import java.util.concurrent.Phaser;
 
 import static java.lang.Integer.max;
 
 public class TrafficSystem {
+    //The traffic lights
     private TrafficLight T1SE, T2WS, T3EW;
+
+    //List of cars waiting in the directions that do not require any traffic lights
     private List<Car> S2W, E2S, W2E;
+
+    //Increment the car id when a new car is inserted
     private int globalCarId = 0;
+
+    //Time which increases one per second
     private int globalTime = 0;
+
+    //1 for T1, 2 for T2, 3 for T3
     private int currentTrafficLight = 1;
+
+    //Stores the last leaving times for the cars in each of the 6 possible paths
     private int lastLeavingTimeSE, lastLeavingTimeWS, lastLeavingTimeEW, lastLeavingTimeSW, lastLeavingTimeES, lastLeavingTimeWE;
+
+    //The number of times the lights are changed
     private int trafficCycle;
+
+    //Instance of the GUI
     GUI gui;
 
+    Phaser phaser;
+
+    //Initialize everything
     public TrafficSystem(){
         T1SE = new TrafficLight();
         T2WS = new TrafficLight();
@@ -34,16 +53,22 @@ public class TrafficSystem {
 
         trafficCycle = 0;
         gui = new GUI();
+
+        phaser = new Phaser(1);
     }
 
+    //This function starts the system
+    //Starts the trafficSystem thread
+    //Starts the GUI thread
     public void startSystem() {
         startTrafficSystem();
-        SwingUtilities.invokeLater(() -> {
-            gui.setVisible(true);
-        });
+        SwingUtilities.invokeLater(() ->
+            gui.setVisible(true)
+        );
         takeInput();
     }
 
+    //This function takes input in a while loop in the main thread
     private void takeInput(){
         System.out.println("Enter Car or Show Status");
 
@@ -51,15 +76,21 @@ public class TrafficSystem {
         while(true){
             String lineInput = reader.nextLine();
 
+            //Show Status of the system at this instant
             if(lineInput.contains(Constants.SHOW_STATUS_MESSAGE)){
+                phaser.register();
                 printTrafficLightStatus();
                 printCarStatus();
+                phaser.arriveAndDeregister();
             }
+            //Add a vehicle to the System
             else addVehicle(lineInput);
         }
     }
 
+    //This function adds a car to the respective trafficLight
     private void addVehicle(String input) {
+        phaser.register();
         List<String> tokens = Arrays.asList(input.split(" "));
         if(tokens.size() < 2) {
             System.out.println(Constants.WRONG_INPUT_FORMAT);
@@ -69,58 +100,71 @@ public class TrafficSystem {
         Direction destinationDirection = getDirection(tokens.get(2));
         if(sourceDirection == null || destinationDirection == null) {
             System.out.println(Constants.WRONG_INPUT_FORMAT);
+            phaser.arriveAndDeregister();
             return;
         }
         if(sourceDirection == destinationDirection){
             System.out.println(Constants.WRONG_DIRECTION_FORMAT);
+            phaser.arriveAndDeregister();
             return;
         }
+
+        //Create a new car with new id and add it to one of the lists
         Car car = new Car(++globalCarId, sourceDirection, destinationDirection, globalTime);
         assignTrafficLightToVehicles(car);
+        phaser.arriveAndDeregister();
     }
 
+    //This contains the thread that handles the changing of traffic lights and passing of cars in the traffic system
     private void startTrafficSystem(){
         Runnable runnable = () -> {
+            //Start with T1
             T1SE.setCurrentLight(1);
+
+            //Time for a vehicle to pass
             int timeForASingleVehicle = 0;
+
+            //Get the initial car to be passed, will be null as all lists are empty
             Car carToBePassed = getCarToPass(getCurrentTrafficLight());
             while(true){
                 try {
+                    //sleep for a second
                     Thread.sleep(1000);
+                    phaser.arriveAndAwaitAdvance();
+
                     passCarsThatDontRequireSignal();
+
                     if(carToBePassed == null){
+                        //try to get a car again
                         carToBePassed = getCarToPass(getCurrentTrafficLight());
                         if(carToBePassed != null){
-
-                            System.out.println("Car fetched at time " + globalTime);
                             timeForASingleVehicle = 1;
                         }
                     }
                     else timeForASingleVehicle++;
+
+                    //Increase global time in gui also
                     globalTime++;
                     gui.updateTimer(globalTime);
 
+                    //Time to change traffic lights
                     if(globalTime % Constants.TIME_FOR_EACH_TRAFFIC_LIGHT == 0)
                     {
                         trafficCycle++;
-                        System.out.println(globalTime);
                         timeForASingleVehicle = 0;
                         currentTrafficLight = currentTrafficLight%3 + 1;
                         setTrafficLightStatus();
                         carToBePassed = getCarToPass(getCurrentTrafficLight());
                         gui.setTrafficLight(currentTrafficLight);
                     }
+                    //Time to pass a car through the crossing
                     if(timeForASingleVehicle == Constants.TIME_FOR_VEHICLE_TO_PASS && carToBePassed != null) {
                         getCurrentTrafficLight().handleCarPassing(carToBePassed);
                         gui.passCar(carToBePassed);
-                        System.out.println(String.format("Car %s passed from %s to %s at time %s",
-                                carToBePassed.getId(),
-                                carToBePassed.getSourceDirection(),
-                                carToBePassed.getDestinationDirection(),
-                                globalTime));
                         carToBePassed = getCarToPass(getCurrentTrafficLight());
                         timeForASingleVehicle = 0;
                     }
+
                 } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -130,6 +174,8 @@ public class TrafficSystem {
         trafficLightThread.start();
     }
 
+    //This checks in the three lists at each second and passes each car which is ready to pass at that time
+    //Also updates the GUI
     private void passCarsThatDontRequireSignal(){
         for(Car car:S2W){
             if(car.getLeavingTime() == globalTime){
@@ -157,11 +203,12 @@ public class TrafficSystem {
         }
     }
 
-
+    //This function gets the next car to pass from the trafficLight
     private Car getCarToPass(TrafficLight trafficLight) {
         return trafficLight.getNextCarToPass();
     }
 
+    //Sets the current trafficLightStatus in the trafficLight POJO
     private void setTrafficLightStatus() {
         if(currentTrafficLight == 1) {
             T1SE.setCurrentLight(1);
@@ -188,6 +235,7 @@ public class TrafficSystem {
         return T1SE;
     }
 
+    //Get the direction object for the corresponding string
     private Direction getDirection(String token) {
         switch (token.toUpperCase()){
             case "EAST":
@@ -202,8 +250,9 @@ public class TrafficSystem {
         }
     }
 
+    //Assigns cars to a traffic light and sets their leaving time
+    //Adds them to the respective lists
     private void assignTrafficLightToVehicles(Car car) {
-        System.out.println("Enter Global Time " + globalTime);
         Direction sourceDirection = car.getSourceDirection();
         Direction destinationDirection = car.getDestinationDirection();
         int leavingTime = 0;
@@ -252,13 +301,13 @@ public class TrafficSystem {
         else {
             System.out.println(Constants.WRONG_DIRECTION_FORMAT);
         }
-        System.out.println("Exit Global Time " + globalTime);
-        System.out.println(String.format("Leaving time for car %s is %s", car.getId(), car.getLeavingTime()));
-
     }
 
+    //This function calculates the leaving Time of the car when the car is entered into the system
+    //This can be precalculated according the number of cars that came before it
     private int getLeavingTime(int direction, int lastLeavingTime) {
         int leavingTime = 6;
+        //If current traffic light is for it
         if(trafficCycle%3 == direction - 1) {
             int t = max(globalTime, lastLeavingTime);
             int allotedCycle = t/ Constants.TIME_FOR_EACH_TRAFFIC_LIGHT;
@@ -267,6 +316,7 @@ public class TrafficSystem {
             }
             else leavingTime += (allotedCycle + 3) * Constants.TIME_FOR_EACH_TRAFFIC_LIGHT;
         }
+        //wait for it to turn green
         else {
             int t = max(getNextCycleForCar(direction) * 60, lastLeavingTime);
             int allotedCycle = t/Constants.TIME_FOR_EACH_TRAFFIC_LIGHT;
@@ -278,6 +328,7 @@ public class TrafficSystem {
         return leavingTime;
     }
 
+    //This function gets the next cycle in which the car can actually pass
     private int getNextCycleForCar(int carDirection) {
         switch (carDirection){
             case 1:
@@ -293,6 +344,7 @@ public class TrafficSystem {
         return trafficCycle;
     }
 
+    //This function prints the status of each traffic light
     private void printTrafficLightStatus(){
         System.out.println("-----------------------------------TRAFFIC LIGHT STATUS--------------------------------------");
         System.out.println(String.format("%-20s %-20s %-20s","TRAFFIC LIGHT", "STATUS", "TIME"));
@@ -308,6 +360,7 @@ public class TrafficSystem {
         System.out.println("----------------------------------------------------------------------------------------------");
     }
 
+    //This function prints the status of each car
     private void printCarStatus() {
         System.out.println("-----------------------------------CAR STATUS--------------------------------------");
         System.out.println(String.format("%-20s %-20s %-20s %-20s %-20s","VEHICLE", "SOURCE", "DESTINATION", "STATUS", "REMAINING TIME"));
@@ -325,8 +378,8 @@ public class TrafficSystem {
                     car.getId(),
                     car.getSourceDirection(),
                     car.getDestinationDirection(),
-                    car.getStatus() == 1? "PASS": "WAIT",
-                    car.getLeavingTime() - globalTime >= 0? car.getLeavingTime() - globalTime: "--"
+                    car.getLeavingTime() <= globalTime? "PASS": "WAIT",
+                    car.getLeavingTime() > globalTime? car.getLeavingTime() - globalTime: "--"
                     ));
         }
         System.out.println("------------------------------------------------------------------------------------");

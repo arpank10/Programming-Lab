@@ -219,8 +219,8 @@ public class BottleManufacturingSystem {
                     finishedBottlesB2++;
                 }
                 bottleHandled = true;
-                System.out.println(globalTime);
-                System.out.println("BOTTLE OF TYPE = " + bottle.getBottleType() + " is sealed and packaged of id " + bottle.getId());
+//                System.out.println(globalTime);
+//                System.out.println("BOTTLE OF TYPE = " + bottle.getBottleType() + " is sealed and packaged of id " + bottle.getId());
             }
             else if(bottle.isSealed()){
                 if(bottle.getBottleType().equals(BottleType.B1)) {
@@ -228,8 +228,8 @@ public class BottleManufacturingSystem {
                         sealedTrayB1.add(bottle);
                         bottleHandled = true;
                         sealedBottlesB1++;
-                        System.out.println(globalTime);
-                        System.out.println("BOTTLE OF TYPE = " + bottle.getBottleType() + " is sealed of id " + bottle.getId());
+//                        System.out.println(globalTime);
+//                        System.out.println("BOTTLE OF TYPE = " + bottle.getBottleType() + " is sealed of id " + bottle.getId());
                     }
                     else bottleHandled = false;
                 }
@@ -238,8 +238,8 @@ public class BottleManufacturingSystem {
                         sealedTrayB2.add(bottle);
                         sealedBottlesB2++;
                         bottleHandled = true;
-                        System.out.println(globalTime);
-                        System.out.println("BOTTLE OF TYPE = " + bottle.getBottleType() + " is sealed of id " + bottle.getId());
+//                        System.out.println(globalTime);
+//                        System.out.println("BOTTLE OF TYPE = " + bottle.getBottleType() + " is sealed of id " + bottle.getId());
                     }
                     else bottleHandled = false;
                 }
@@ -250,8 +250,8 @@ public class BottleManufacturingSystem {
                     if(bottle.getBottleType() == BottleType.B1) packagedBottlesB1++;
                     else packagedBottlesB2++;
                     bottleHandled = true;
-                    System.out.println(globalTime);
-                    System.out.println("BOTTLE OF TYPE = " + bottle.getBottleType() + " is packaged of id " + bottle.getId());
+//                    System.out.println(globalTime);
+//                    System.out.println("BOTTLE OF TYPE = " + bottle.getBottleType() + " is packaged of id " + bottle.getId());
                 }
                 else bottleHandled = false;
             }

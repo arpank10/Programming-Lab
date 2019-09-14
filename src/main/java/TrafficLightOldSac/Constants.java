@@ -1,5 +1,7 @@
 package TrafficLightOldSac;
 
+
+//Contains the various constants and error messages for easy access
 public class Constants {
     public static final int TIME_FOR_EACH_TRAFFIC_LIGHT = 60;
     public static final int TIME_FOR_VEHICLE_TO_PASS = 6;

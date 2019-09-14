@@ -1,5 +1,6 @@
 package TrafficLightOldSac;
 
+//Eventlistener which is implemented by the GUI and called by the TrafficSystem
 public interface EventListener {
     void addCar(Car car);
 

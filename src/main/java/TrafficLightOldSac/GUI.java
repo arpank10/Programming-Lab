@@ -11,23 +11,32 @@ public class GUI extends JFrame implements EventListener{
     int globalTime = 0;
     int trafficLight = 1;
 
+    //List of the cars in each direction
     List<Car> S2E,W2S,E2W;
     List<Car> S2W, E2S, W2E;
+
+    //List of the cars passed to each direction
     List<Car> passedToE, passedToS, passedToW;
 
-
+    //The Top line y co-ordinate in the T
     int topHorizontalY = 300;
     int bottomHorizontalY = 300 + Constants.WIDTH_OF_LANE;
 
+    //Vertical Lines x co-ordinate in the T
     int leftVerticalX = 350;
     int rightVerticalX = 350 + Constants.WIDTH_OF_LANE;
 
+    //Padding of car from the lane
     int paddingFromLane = (Constants.WIDTH_OF_LANE - 3*Constants.WIDTH_OF_CAR)/4;
+
+    //Padding of the car from the next car
     int paddingFromCar = Constants.WIDTH_OF_CAR/5;
 
+    //Initialize everything
     public GUI() {
         super("Lines Drawing Demo");
 
+        //Size of the window
         setSize(800, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -45,8 +54,8 @@ public class GUI extends JFrame implements EventListener{
 
     }
 
-    void drawLines(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
+    //Draw the roads
+    void drawLines(Graphics2D g2d) {
 
         //Horizontal top
         g2d.drawLine(0, topHorizontalY, 800, topHorizontalY);
@@ -59,19 +68,9 @@ public class GUI extends JFrame implements EventListener{
         g2d.drawLine(leftVerticalX, bottomHorizontalY, leftVerticalX, 800);
         g2d.drawLine(rightVerticalX, bottomHorizontalY, rightVerticalX, 800);
 
-        //Traffic Lights
-        drawTrafficLights(g2d);
-
-        //Timer
-        drawTimer(g2d);
-
-        //Drawing Cars
-        renderCars(g2d);
-
-        //Draw Legends
-        drawLegends(g2d);
     }
 
+    //Draw the legends on top right corner
     void drawLegends(Graphics2D g2d) {
         g2d.drawRect(750 - paddingFromCar - Constants.LENGTH_OF_CAR, 25 + paddingFromLane + Constants.WIDTH_OF_CAR, Constants.LENGTH_OF_CAR, Constants.WIDTH_OF_CAR);
         g2d.setColor(Color.GREEN);
@@ -100,6 +99,7 @@ public class GUI extends JFrame implements EventListener{
 
     }
 
+    //Draw the traffic lights with color
     void drawTrafficLights(Graphics2D g2d){
         g2d.setColor(Color.RED);
         if(trafficLight == 1) {
@@ -118,6 +118,7 @@ public class GUI extends JFrame implements EventListener{
         g2d.fillOval(275, 425, 50, 50);
     }
 
+    //Draw the timer
     void drawTimer(Graphics2D g2d){
         g2d.setColor(Color.BLACK);
         Font currentFont = g2d.getFont();
@@ -126,6 +127,7 @@ public class GUI extends JFrame implements EventListener{
         g2d.drawString("Time: " + globalTime, 25, 100);
     }
 
+    //Draw the cars from the lists
     void renderCars(Graphics2D g2d) {
         for(int i = 0;i<W2E.size();i++){
             drawACar(g2d, W2E.get(i),leftVerticalX - (i+1)*Constants.LENGTH_OF_CAR - i*paddingFromCar, topHorizontalY + paddingFromLane,
@@ -172,6 +174,7 @@ public class GUI extends JFrame implements EventListener{
         }
     }
 
+    //Draw a single car with id
     private void drawACar(Graphics2D g2d, Car car, int x, int y, int length, int width){
         if(car.getLeavingTime() - globalTime <0)
             g2d.setColor(Color.BLUE);
@@ -197,9 +200,16 @@ public class GUI extends JFrame implements EventListener{
 
     public void paint(Graphics g) {
         super.paint(g);
-        drawLines(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        drawLines(g2d);
+        drawTrafficLights(g2d);
+        drawTimer(g2d);
+        renderCars(g2d);
+        drawLegends(g2d);
     }
 
+    //This function adds a car in the respective list
     @Override
     public void addCar(Car car) {
         Direction sourceDirection = car.getSourceDirection();
@@ -231,12 +241,14 @@ public class GUI extends JFrame implements EventListener{
 
     }
 
+    //This function sets the traffic lights colors
     @Override
     public void setTrafficLight(int trafficLight) {
         this.trafficLight = trafficLight;
         this.repaint();
     }
 
+    //This function passes a car and adds and removes it from the corresponding list
     @Override
     public void passCar(Car car) {
         Direction sourceDirection = car.getSourceDirection();
@@ -271,6 +283,7 @@ public class GUI extends JFrame implements EventListener{
         repaint();
     }
 
+    //This function updates the timer in each second
     @Override
     public void updateTimer(int globalTime) {
         if(this.globalTime != globalTime){

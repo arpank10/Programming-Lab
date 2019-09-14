@@ -1,5 +1,7 @@
 package TrafficLightOldSac;
 
+
+//POJO for a car
 public class Car {
     private int id;
     private Direction sourceDirection;

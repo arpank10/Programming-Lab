@@ -3,6 +3,8 @@ package TrafficLightOldSac;
 import java.util.ArrayList;
 import java.util.List;
 
+//POJO for the traffic light
+//Contains the waiting and the passed lists
 public class TrafficLight {
     private int currentLight; //Red 0 Green 1
     private List<Car> waitingCarsAtSignal;
@@ -42,13 +44,14 @@ public class TrafficLight {
         waitingCarsAtSignal.add(car);
     }
 
+    //When a car passes remove it from waiting and add it to passed
     public void handleCarPassing(Car car){
         waitingCarsAtSignal.remove(car);
         car.setStatus(1);
-        car.setLeavingTime(0);
         passedCarsAtSignal.add(car);
     }
 
+    //Get the next car to pass, if no cars, return null
     public Car getNextCarToPass() {
         if(waitingCarsAtSignal.size() == 0)
             return null;
