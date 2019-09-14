@@ -2,7 +2,8 @@ package TrafficLightOldSac;
 
 import javax.swing.*;
 import java.util.*;
-import java.util.concurrent.Phaser;
+
+import static java.lang.Integer.max;
 
 public class TrafficSystem {
     private TrafficLight T1SE, T2WS, T3EW;
@@ -10,28 +11,35 @@ public class TrafficSystem {
     private int globalCarId = 0;
     private int globalTime = 0;
     private int currentTrafficLight = 1;
-    Phaser phaser;
+    private int lastLeavingTimeSE, lastLeavingTimeWS, lastLeavingTimeEW, lastLeavingTimeSW, lastLeavingTimeES, lastLeavingTimeWE;
+    private int trafficCycle;
     GUI gui;
 
     public TrafficSystem(){
         T1SE = new TrafficLight();
         T2WS = new TrafficLight();
         T3EW = new TrafficLight();
+
         S2W = new ArrayList<>();
         E2S = new ArrayList<>();
         W2E = new ArrayList<>();
+
+        lastLeavingTimeSE = 0;
+        lastLeavingTimeWS = 60;
+        lastLeavingTimeEW = 120;
+
+        lastLeavingTimeSW = 0;
+        lastLeavingTimeES = 0;
+        lastLeavingTimeWE = 0;
+
+        trafficCycle = 0;
         gui = new GUI();
-//        phaser = new Phaser(0);
     }
 
     public void startSystem() {
         startTrafficSystem();
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Entered");
-                gui.setVisible(true);
-            }
+        SwingUtilities.invokeLater(() -> {
+            gui.setVisible(true);
         });
         takeInput();
     }
@@ -44,19 +52,14 @@ public class TrafficSystem {
             String lineInput = reader.nextLine();
 
             if(lineInput.contains(Constants.SHOW_STATUS_MESSAGE)){
-//                phaser.register();
                 printTrafficLightStatus();
                 printCarStatus();
-//                phaser.arriveAndAwaitAdvance();
-//                phaser.arriveAndDeregister();
             }
             else addVehicle(lineInput);
         }
     }
 
     private void addVehicle(String input) {
-//        phaser.register();
-//        System.out.println(phaser.getRegisteredParties());
         List<String> tokens = Arrays.asList(input.split(" "));
         if(tokens.size() < 2) {
             System.out.println(Constants.WRONG_INPUT_FORMAT);
@@ -74,20 +77,16 @@ public class TrafficSystem {
         }
         Car car = new Car(++globalCarId, sourceDirection, destinationDirection, globalTime);
         assignTrafficLightToVehicles(car);
-//        phaser.arriveAndAwaitAdvance();
-//        phaser.arriveAndDeregister();
     }
 
     private void startTrafficSystem(){
         Runnable runnable = () -> {
-//            phaser.register();
             T1SE.setCurrentLight(1);
             int timeForASingleVehicle = 0;
             Car carToBePassed = getCarToPass(getCurrentTrafficLight());
             while(true){
                 try {
                     Thread.sleep(1000);
-//                    phaser.arriveAndAwaitAdvance();
                     passCarsThatDontRequireSignal();
                     if(carToBePassed == null){
                         carToBePassed = getCarToPass(getCurrentTrafficLight());
@@ -101,6 +100,16 @@ public class TrafficSystem {
                     globalTime++;
                     gui.updateTimer(globalTime);
 
+                    if(globalTime % Constants.TIME_FOR_EACH_TRAFFIC_LIGHT == 0)
+                    {
+                        trafficCycle++;
+                        System.out.println(globalTime);
+                        timeForASingleVehicle = 0;
+                        currentTrafficLight = currentTrafficLight%3 + 1;
+                        setTrafficLightStatus();
+                        carToBePassed = getCarToPass(getCurrentTrafficLight());
+                        gui.setTrafficLight(currentTrafficLight);
+                    }
                     if(timeForASingleVehicle == Constants.TIME_FOR_VEHICLE_TO_PASS && carToBePassed != null) {
                         getCurrentTrafficLight().handleCarPassing(carToBePassed);
                         gui.passCar(carToBePassed);
@@ -112,18 +121,8 @@ public class TrafficSystem {
                         carToBePassed = getCarToPass(getCurrentTrafficLight());
                         timeForASingleVehicle = 0;
                     }
-                    if(globalTime % Constants.TIME_FOR_EACH_TRAFFIC_LIGHT == 0)
-                    {
-                        System.out.println(globalTime);
-                        timeForASingleVehicle = 0;
-                        currentTrafficLight = currentTrafficLight%3 + 1;
-                        setTrafficLightStatus();
-                        carToBePassed = getCarToPass(getCurrentTrafficLight());
-                        gui.setTrafficLight(currentTrafficLight);
-                    }
                 } catch (InterruptedException e) {
                         e.printStackTrace();
-//                        phaser.arriveAndDeregister();
                     }
             }
         };
@@ -207,43 +206,46 @@ public class TrafficSystem {
         System.out.println("Enter Global Time " + globalTime);
         Direction sourceDirection = car.getSourceDirection();
         Direction destinationDirection = car.getDestinationDirection();
-        int leavingTime = 6;
+        int leavingTime = 0;
         if(sourceDirection == Direction.SOUTH && destinationDirection == Direction.EAST){
-            if(currentTrafficLight == 3) leavingTime+= 60 - globalTime%60;
-            else if(currentTrafficLight == 2) leavingTime+=120 - globalTime%60;
-            leavingTime += T1SE.getWaitingCarsAtSignal().size() * 6;
-            car.setLeavingTime(leavingTime + globalTime);
+            leavingTime = getLeavingTime(1, lastLeavingTimeSE);
+            lastLeavingTimeSE = leavingTime;
+            car.setLeavingTime(leavingTime);
             T1SE.addCarToWaitingList(car);
             gui.addCar(car);
         }
         else if(sourceDirection == Direction.WEST && destinationDirection == Direction.SOUTH){
-            if(currentTrafficLight == 1) leavingTime+=60 - globalTime%60;
-            else if(currentTrafficLight == 3) leavingTime+=120 - globalTime%60;
-            leavingTime += T2WS.getWaitingCarsAtSignal().size() * 6;
-            car.setLeavingTime(leavingTime + globalTime);
+            leavingTime = getLeavingTime(2, lastLeavingTimeWS);
+            lastLeavingTimeWS = leavingTime;
+            car.setLeavingTime(leavingTime);
             T2WS.addCarToWaitingList(car);
             gui.addCar(car);
         }
         else if(sourceDirection == Direction.EAST && destinationDirection == Direction.WEST){
-            if(currentTrafficLight == 2) leavingTime+=60 - globalTime%60;
-            else if(currentTrafficLight == 1) leavingTime+=120 - globalTime%60;
-            leavingTime += T3EW.getWaitingCarsAtSignal().size() * 6;
-            car.setLeavingTime(leavingTime + globalTime);
+            leavingTime = getLeavingTime(3, lastLeavingTimeEW);
+            lastLeavingTimeEW = leavingTime;
+            car.setLeavingTime(leavingTime);
             T3EW.addCarToWaitingList(car);
             gui.addCar(car);
         }
         else if(sourceDirection == Direction.SOUTH && destinationDirection == Direction.WEST){
-            car.setLeavingTime(leavingTime + S2W.size()*6 + globalTime);
+            leavingTime = max(globalTime, lastLeavingTimeSW) + Constants.TIME_FOR_VEHICLE_TO_PASS;
+            lastLeavingTimeSW = leavingTime;
+            car.setLeavingTime(leavingTime);
             S2W.add(car);
             gui.addCar(car);
         }
         else if(sourceDirection == Direction.EAST && destinationDirection == Direction.SOUTH){
-            car.setLeavingTime(leavingTime + E2S.size()*6 + globalTime);
+            leavingTime = max(globalTime, lastLeavingTimeES) + Constants.TIME_FOR_VEHICLE_TO_PASS;
+            lastLeavingTimeES = leavingTime;
+            car.setLeavingTime(leavingTime);
             E2S.add(car);
             gui.addCar(car);
         }
         else if(sourceDirection == Direction.WEST && destinationDirection == Direction.EAST){
-            car.setLeavingTime(leavingTime + W2E.size()*6 + globalTime);
+            leavingTime = max(globalTime, lastLeavingTimeWE) + Constants.TIME_FOR_VEHICLE_TO_PASS;
+            lastLeavingTimeWE = leavingTime;
+            car.setLeavingTime(leavingTime);
             W2E.add(car);
             gui.addCar(car);
         }
@@ -253,6 +255,42 @@ public class TrafficSystem {
         System.out.println("Exit Global Time " + globalTime);
         System.out.println(String.format("Leaving time for car %s is %s", car.getId(), car.getLeavingTime()));
 
+    }
+
+    private int getLeavingTime(int direction, int lastLeavingTime) {
+        int leavingTime = 6;
+        if(trafficCycle%3 == direction - 1) {
+            int t = max(globalTime, lastLeavingTime);
+            int allotedCycle = t/ Constants.TIME_FOR_EACH_TRAFFIC_LIGHT;
+            if(leavingTime + t - allotedCycle*Constants.TIME_FOR_EACH_TRAFFIC_LIGHT <= 59){
+                leavingTime += t;
+            }
+            else leavingTime += (allotedCycle + 3) * Constants.TIME_FOR_EACH_TRAFFIC_LIGHT;
+        }
+        else {
+            int t = max(getNextCycleForCar(direction) * 60, lastLeavingTime);
+            int allotedCycle = t/Constants.TIME_FOR_EACH_TRAFFIC_LIGHT;
+            if(leavingTime + t - allotedCycle*Constants.TIME_FOR_EACH_TRAFFIC_LIGHT <= 59){
+                leavingTime += t;
+            }
+            else leavingTime += (allotedCycle + 3) * Constants.TIME_FOR_EACH_TRAFFIC_LIGHT;
+        }
+        return leavingTime;
+    }
+
+    private int getNextCycleForCar(int carDirection) {
+        switch (carDirection){
+            case 1:
+                return globalTime/180 * 3 + 3;
+            case 2:
+                if(currentTrafficLight == 1)
+                    return trafficCycle+1;
+                else return globalTime/180 * 3 + 4;
+            case 3:
+                if(currentTrafficLight == 1 || currentTrafficLight == 2)
+                    return trafficCycle + currentTrafficLight;
+        }
+        return trafficCycle;
     }
 
     private void printTrafficLightStatus(){

@@ -108,6 +108,7 @@ public class MerchandiseSaleSystem {
         Thread t = Thread.currentThread();
         System.out.println("Order with order number " + order.getOrderNumber() + (success?" passed!":" failed!") + " in thread "
         + t.getId());
+        printInventory();
     }
 
     private Runnable getNewRunnable(Order order){
@@ -117,23 +118,22 @@ public class MerchandiseSaleSystem {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            updateInventory(order);
+            boolean result = updateInventory(order);
+            processedOrders.incrementAndGet();
+            printOrderStatus(order, result);
+            waitingLatch.countDown();
         };
         return runnable;
     }
 
-    private synchronized void updateInventory(Order order){
+    private synchronized boolean updateInventory(Order order){
         OrderType orderType = order.getOrderType();
         int orderQuantity = order.getQuantity();
         int presentQuantity = inventory.get(orderType);
         if (presentQuantity>= orderQuantity) {
             inventory.put(orderType, presentQuantity - orderQuantity);
-            printOrderStatus(order, true);
-        } else {
-            printOrderStatus(order, false);
+            return true;
         }
-        processedOrders.incrementAndGet();
-        printInventory();
-        waitingLatch.countDown();
+        return false;
     }
 }

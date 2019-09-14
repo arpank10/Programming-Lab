@@ -199,16 +199,6 @@ public class GUI extends JFrame implements EventListener{
         super.paint(g);
         drawLines(g);
     }
-    public static void main(String[] args){
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Entered");
-                GUI gui = new GUI();
-                gui.setVisible(true);
-            }
-        });
-    }
 
     @Override
     public void addCar(Car car) {
