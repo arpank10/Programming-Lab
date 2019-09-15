@@ -288,7 +288,7 @@ public class GUI extends JFrame implements EventListener{
     public void updateTimer(int globalTime) {
         if(this.globalTime != globalTime){
             this.globalTime = globalTime;
-            repaint(0, 0, 200, 200);
+            repaint();
         }
     }
 }
