@@ -54,11 +54,13 @@ public class PackagingUnit {
                     timeForBottle++;
                     localTime++;
 
+                    if(bottle == null)
+                        timeForBottle = 0;
                     //Packaging finished
                     //Try to send it to tray, if successfully pushed to buffer tray of sealing or godown, bottleHandled is true, else false
                     //If bottleHandled, then togglePriority and get the next bottle
                     //Else try to push the same bottle in the next second by decreasing timeForBottle by 1
-                    if(timeForBottle == Constants.TIME_TO_PACKAGE){
+                    if(timeForBottle == Constants.TIME_TO_PACKAGE ){
                         bottle = packageBottle(bottle);
                         boolean bottleHandled = mainSystem.handleBottle(bottle, 1);
                         timeForBottle = bottleHandled?0:Constants.TIME_TO_PACKAGE - 1;

@@ -54,6 +54,8 @@ public class SealingUnit {
                     timeForBottle++;
                     localTime++;
 
+                    if(bottle == null)
+                        timeForBottle = 0;
                     //Sealing finished
                     //Try to send it to tray, if successfully pushed to buffer tray of packaging or godown, bottleHandled is true, else false
                     //If bottleHandled, then togglePriority and get the next bottle
