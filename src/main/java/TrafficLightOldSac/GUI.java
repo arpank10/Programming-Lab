@@ -176,9 +176,9 @@ public class GUI extends JFrame implements EventListener{
 
     //Draw a single car with id
     private void drawACar(Graphics2D g2d, Car car, int x, int y, int length, int width){
-        if(car.getLeavingTime() - globalTime <0)
+        if(car.getLeavingTime() - globalTime <=0)
             g2d.setColor(Color.BLUE);
-        else if(car.getLeavingTime() - globalTime <= 6)
+        else if(car.getLeavingTime() - globalTime <=6)
             g2d.setColor(Color.GREEN);
 
         g2d.drawRect(x, y, length, width);

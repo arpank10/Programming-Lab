@@ -39,7 +39,7 @@ public class BottleManufacturingSystem {
     private SealingUnit sealingUnit;
 
     //Synchronization variables
-    ReentrantLock lock;
+    ReentrantLock lockHandleBottle, lockUnifinishedTrays;
     CyclicBarrier cyclicBarrier;
 
 
@@ -56,7 +56,8 @@ public class BottleManufacturingSystem {
         packagingUnit = new PackagingUnit(this);
         sealingUnit = new SealingUnit(this);
 
-        lock = new ReentrantLock();
+        lockHandleBottle = new ReentrantLock();
+        lockUnifinishedTrays = new ReentrantLock();
 
         //When both threads have finished the work for a second
         //Cyclic barrier increase the global time
@@ -118,43 +119,44 @@ public class BottleManufacturingSystem {
     //Take in order of priority, if empty take the other
     public Bottle getNextBottleForPackagingUnit(int priority){
         Bottle nextBottleToPack = null;
-        switch (priority) {
-            case 1:
-                if (!sealedTrayB1.isEmpty()) {
-                    nextBottleToPack = sealedTrayB1.get(0);
-                    sealedTrayB1.remove(0);
-                } else if (!sealedTrayB2.isEmpty()){
-                    nextBottleToPack = sealedTrayB2.get(0);
-                    sealedTrayB2.remove(0);
-                }
-                else if (!unfinishedB1tray.isEmpty()) {
-                    nextBottleToPack = unfinishedB1tray.get(0);
-                    unfinishedB1tray.remove(0);
-                }
-                else if(!unfinishedB2tray.isEmpty()) {
-                    nextBottleToPack = unfinishedB2tray.get(0);
-                    unfinishedB2tray.remove(0);
-                }
-                break;
-            case 2:
-                if (!sealedTrayB2.isEmpty()) {
-                    nextBottleToPack = sealedTrayB2.get(0);
-                    sealedTrayB2.remove(0);
-                }
-                else if (!sealedTrayB1.isEmpty()) {
-                    nextBottleToPack = sealedTrayB1.get(0);
-                    sealedTrayB1.remove(0);
-                }
-                else if(!unfinishedB2tray.isEmpty()) {
-                    nextBottleToPack = unfinishedB2tray.get(0);
-                    unfinishedB2tray.remove(0);
-                }
-                else if (!unfinishedB1tray.isEmpty()) {
-                    nextBottleToPack = unfinishedB1tray.get(0);
-                    unfinishedB1tray.remove(0);
-                }
-                break;
-            default: nextBottleToPack =  null;
+        try {
+            lockUnifinishedTrays.lock();
+            switch (priority) {
+                case 1:
+                    if (!sealedTrayB1.isEmpty()) {
+                        nextBottleToPack = sealedTrayB1.get(0);
+                        sealedTrayB1.remove(0);
+                    } else if (!sealedTrayB2.isEmpty()) {
+                        nextBottleToPack = sealedTrayB2.get(0);
+                        sealedTrayB2.remove(0);
+                    } else if (!unfinishedB1tray.isEmpty()) {
+                        nextBottleToPack = unfinishedB1tray.get(0);
+                        unfinishedB1tray.remove(0);
+                    } else if (!unfinishedB2tray.isEmpty()) {
+                        nextBottleToPack = unfinishedB2tray.get(0);
+                        unfinishedB2tray.remove(0);
+                    }
+                    break;
+                case 2:
+                    if (!sealedTrayB2.isEmpty()) {
+                        nextBottleToPack = sealedTrayB2.get(0);
+                        sealedTrayB2.remove(0);
+                    } else if (!sealedTrayB1.isEmpty()) {
+                        nextBottleToPack = sealedTrayB1.get(0);
+                        sealedTrayB1.remove(0);
+                    } else if (!unfinishedB2tray.isEmpty()) {
+                        nextBottleToPack = unfinishedB2tray.get(0);
+                        unfinishedB2tray.remove(0);
+                    } else if (!unfinishedB1tray.isEmpty()) {
+                        nextBottleToPack = unfinishedB1tray.get(0);
+                        unfinishedB1tray.remove(0);
+                    }
+                    break;
+                default:
+                    nextBottleToPack = null;
+            }
+        } finally {
+            lockUnifinishedTrays.unlock();
         }
         return nextBottleToPack;
     }
@@ -165,34 +167,39 @@ public class BottleManufacturingSystem {
     //Take in order of priority, if empty take the other
     public Bottle getNextBottleForSealingUnit(int priority){
         Bottle nextBottleToSeal = null;
-        if(!packagedTrays.isEmpty()){
-            nextBottleToSeal = packagedTrays.get(0);
-            packagedTrays.remove(0);
-        }
-        else{
-            switch (priority) {
-                case 1:
-                    if (!unfinishedB1tray.isEmpty()) {
-                        nextBottleToSeal = unfinishedB1tray.get(0);
-                        unfinishedB1tray.remove(0);
-                    }
-                    else if(!unfinishedB2tray.isEmpty()) {
-                    nextBottleToSeal = unfinishedB2tray.get(0);
-                    unfinishedB2tray.remove(0);
-                }
-                    break;
-                case 2:
-                    if(!unfinishedB2tray.isEmpty()) {
+        try{
+            lockUnifinishedTrays.lock();
+            if(!packagedTrays.isEmpty()){
+                nextBottleToSeal = packagedTrays.get(0);
+                packagedTrays.remove(0);
+            }
+            else{
+                switch (priority) {
+                    case 1:
+                        if (!unfinishedB1tray.isEmpty()) {
+                            nextBottleToSeal = unfinishedB1tray.get(0);
+                            unfinishedB1tray.remove(0);
+                        }
+                        else if(!unfinishedB2tray.isEmpty()) {
                         nextBottleToSeal = unfinishedB2tray.get(0);
                         unfinishedB2tray.remove(0);
                     }
-                    else if (!unfinishedB1tray.isEmpty()) {
-                        nextBottleToSeal = unfinishedB1tray.get(0);
-                        unfinishedB1tray.remove(0);
-                    }
-                    break;
-                default: nextBottleToSeal =  null;
+                        break;
+                    case 2:
+                        if(!unfinishedB2tray.isEmpty()) {
+                            nextBottleToSeal = unfinishedB2tray.get(0);
+                            unfinishedB2tray.remove(0);
+                        }
+                        else if (!unfinishedB1tray.isEmpty()) {
+                            nextBottleToSeal = unfinishedB1tray.get(0);
+                            unfinishedB1tray.remove(0);
+                        }
+                        break;
+                    default: nextBottleToSeal =  null;
+                }
             }
+        } finally {
+            lockUnifinishedTrays.unlock();
         }
         return nextBottleToSeal;
     }
@@ -203,11 +210,11 @@ public class BottleManufacturingSystem {
     //The bottle if only packaged goes into the packagedTray
     //If the respective tray is full, this function returns false and in the next second, the unit again tries to push it
     //Otherwise the function returns true
-    //For synchronization lock is acquired so that at a time only one unit is able to use this function
+    //For synchronization lockHandleBottle is acquired so that at a time only one unit is able to use this function
     public boolean handleBottle(Bottle bottle, int callingUnit){
         boolean bottleHandled = false;
         try{
-            lock.lock();
+            lockHandleBottle.lock();
             if(bottle.isPackaged() && bottle.isSealed()){
                 bottle.setInGoDown(true);
                 if(bottle.getBottleType() == BottleType.B1) {
@@ -256,7 +263,7 @@ public class BottleManufacturingSystem {
                 else bottleHandled = false;
             }
         } finally {
-            lock.unlock();
+            lockHandleBottle.unlock();
         }
         return bottleHandled;
     }

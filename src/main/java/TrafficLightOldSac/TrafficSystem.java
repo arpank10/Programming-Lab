@@ -362,7 +362,7 @@ public class TrafficSystem {
 
     //This function prints the status of each car
     private void printCarStatus() {
-        System.out.println("-----------------------------------CAR STATUS--------------------------------------");
+        System.out.println("-----------------------------------CAR STATUS-----------------------------------------------------------");
         System.out.println(String.format("%-20s %-20s %-20s %-20s %-20s","VEHICLE", "SOURCE", "DESTINATION", "STATUS", "REMAINING TIME"));
         List<Car> allCars = S2W;
         allCars.addAll(E2S);
@@ -382,6 +382,6 @@ public class TrafficSystem {
                     car.getLeavingTime() > globalTime? car.getLeavingTime() - globalTime: "--"
                     ));
         }
-        System.out.println("------------------------------------------------------------------------------------");
+        System.out.println("---------------------------------------------------------------------------------------------------------");
     }
 }
