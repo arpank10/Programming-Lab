@@ -15,7 +15,7 @@ get_number_of_strings(L, W, S) :- L = [X|L1], atom_number(X, N1), step(L1, N1, W
 step(L, N, W, S) :- range(N, R), R = 1, N1 is N+64, append(S, [N1], S1), get_number_of_strings(L, W1, S1), W is W1*R;
                     range(N, R), R = 0, W is 0.
 
-$ decode S and W is the no. of ways.
+% decode S and W is the no. of ways.
 decode(S,W) :-
     string_chars(S,L),
     get_number_of_strings(L, W, []).
