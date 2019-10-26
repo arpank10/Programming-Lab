@@ -36,10 +36,12 @@ desserts(["Ice-cream", "Malai Sandwich", "Rasmalai"]).
 last(X,[X]).
 last(X,[_|Z]) :- last(X,Z).
 
+% possible values for a given foods(and their values) of the category chosen in 'diet' plan.
 value(X, Y, Z, H, V) :- X = 1, starter(H, V);
                         Y = 1, main_dish(H, V);
                         Z = 1, dessert(H, V).
 
+% recursively get menu items for diet plan until limit of calories is reached.
 get_menu_items(X, Y, Z, L, R, V) :- L = [H|L1], value(X, Y, Z, H, V1), V1 =< V, V2 is V - V1, append(R, [H], R1), get_menu_items(X, Y, Z, L1, R1, V2), subtract(R1, [H], R2), get_menu_items(X, Y, Z, L1, R2, V).
 
 get_menu_items(X, Y, Z, L, R, V) :- L = [H|L1], value(X, Y, Z, H, V1), V1 > V, get_menu_items(X, Y, Z, L1, R, V).
@@ -48,22 +50,23 @@ get_menu_items(_, _, _, [], [], _) :- !.
 
 get_menu_items(_, _, _, [], R, _) :- write("Items: "), p(R).
 
-
+% printing a list
 p([]).
 
 p(R) :-  R = [R0|R1], last(R0, R), write(R0), writeln("."), p(R1);
          R = [R0|R1], not(last(R0, R)), write(R0), write(", "), p(R1).
 
 
-
+% possible combinations for hungry plan
 hungry() :- starter(X, _), main_dish(Y, _), dessert(Z, _), write("Items: "),  write(X), write(", "), write(Y), write(", "), write(Z), writeln(".").
 
+%possible combinations for a diet plan
 diet(X, Y, Z) :-
     X = 1, starters(S), get_menu_items(X, Y, Z, S, [], 40);
     Y = 1, main_dishs(M), get_menu_items(X, Y, Z, M, [], 40);
     Z = 1, desserts(D), get_menu_items(X, Y, Z, D, [], 40).
 
-
+% possible combinations for a not-so-hungry plan
 not_so_hungry(X, _, Z) :- X = 1, starter(S, V), main_dish(M, V1), V2 is V + V1, V2 =<80, write("Items: "),  write(S), write(", "), write(M), writeln(".");
                           Z = 1, main_dish(M, V), dessert(D, V1), V2 is V + V1, V2 =<80, write("Items: "),  write(M), write(", "), write(D), writeln(".").
 
@@ -72,4 +75,3 @@ find_items(S, X, Y, Z) :-
     menu(S, X, Y, Z), S = "hungry", hungry(), false();
     menu(S, X, Y, Z), S = "diet", diet(X, Y, Z), false();
     menu("not_so_hungry", X, Y, Z), S = "not_so_hungry", not_so_hungry(X, Y, Z), false().
-
