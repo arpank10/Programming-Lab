@@ -1,10 +1,12 @@
-menu("hungry", 1, 1, 1).
+% Types of categories available according to hunger index.
+menu("hungry", 1, 1, 1). 
 menu("not_so_hungry", 1, 1, 0).
 menu("not_so_hungry", 0, 1, 1).
 menu("diet", 1, 0, 0).
 menu("diet", 0, 1, 0).
 menu("diet", 0, 0, 1).
 
+% costs of each tems
 starter("Corn Tikki", 30).
 starter("Tomato Soup", 20).
 starter("Chilli Paneer", 40).
@@ -22,12 +24,15 @@ dessert("Ice-cream", 20).
 dessert("Malai Sandwich", 30).
 dessert("Rasmalai", 10).
 
+%recipes available for various categories.
 starters(["Corn Tikki","Tomato Soup", "Chilli Paneer", "Crispy chicken", "Papdi Chaat", "Cold Drink" ]).
 
 main_dishs(["Kadhai Paneer with Butter / Plain Naan", "Veg Korma with Butter / Plain Naan", "Murgh Lababdar with Butter /Plain Naan", "Veg Dum Biryani with Dal Tadka", "Steam Rice with Dal Tadka" ]).
 
 desserts(["Ice-cream", "Malai Sandwich", "Rasmalai"]).
 
+
+% Clause for finding the last element of the list.
 last(X,[X]).
 last(X,[_|Z]) :- last(X,Z).
 
@@ -42,6 +47,7 @@ get_menu_items(X, Y, Z, L, R, V) :- L = [H|L1], value(X, Y, Z, H, V1), V1 > V, g
 get_menu_items(_, _, _, [], [], _) :- !.
 
 get_menu_items(_, _, _, [], R, _) :- write("Items: "), p(R).
+
 
 p([]).
 
@@ -61,6 +67,7 @@ diet(X, Y, Z) :-
 not_so_hungry(X, _, Z) :- X = 1, starter(S, V), main_dish(M, V1), V2 is V + V1, V2 =<80, write("Items: "),  write(S), write(", "), write(M), writeln(".");
                           Z = 1, main_dish(M, V), dessert(D, V1), V2 is V + V1, V2 =<80, write("Items: "),  write(M), write(", "), write(D), writeln(".").
 
+% Possible combinations of items from the selected categories.
 find_items(S, X, Y, Z) :-
     menu(S, X, Y, Z), S = "hungry", hungry(), false();
     menu(S, X, Y, Z), S = "diet", diet(X, Y, Z), false();
