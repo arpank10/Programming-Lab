@@ -4,12 +4,11 @@ import Data.List
 --List of teams
 teams = ["BS","CM","CH","CV","CS","DS","EE","HU","MA","ME","PH","ST"]
 --Seed value used to generate random fixtures,different seeds will generate different values
-seed = 42
 
 --All the function definitions
 get_all_matches :: [[Char]] -> Int -> Int -> Int -> [([Char],[Char ],Int, Int)]
-newRand :: Int -> Int -> Int
-fixture:: [Char] -> IO()
+newRand :: Int -> Int -> Int -> Int
+fixture:: [Char] -> Int -> IO()
 print_matches::[([Char],[Char],Int, Int)] -> IO()
 print_match::[Char]->[([Char],[Char],Int, Int)] -> IO()
 print_next_match::Int->[([Char],[Char],Int, Int)] -> IO()
@@ -28,17 +27,17 @@ time (_,_,_,t)
  | otherwise = "7:30 PM"
 
 --Random function generator to generate a number between a and b
-newRand a b = head(take 1(randomRs (a,b) (mkStdGen seed) :: [Int]))
+newRand a b seed = head(take 1(randomRs (a,b) (mkStdGen seed) :: [Int]))
 
 --Generates a random list of 12 teams
-draw [] = []
+draw [] _ = []
 
-draw teams = do
+draw teams seed = do
  let n = length teams
- let num = newRand 0 (n-1)
+ let num = newRand 0 (n-1) seed
  let team = teams!!num
  let new_teams = delete team teams
- team:(draw new_teams)
+ team:(draw new_teams seed)
 
 
 --Returns all the fixtures in the form of list of tuples (team 1, team 2, date, time)
@@ -75,18 +74,18 @@ print_next_match index fixtures = do
 
 
 --Main fixture function which generates all or a particular team's fixtures
-fixture t
-   | t == "all" = print_matches(get_all_matches (draw teams) i d time)
-   | otherwise = print_match t (get_all_matches (draw teams) i d time )
+fixture t seed
+   | t == "all" = print_matches(get_all_matches (draw teams seed) i d time)
+   | otherwise = print_match t (get_all_matches (draw teams seed) i d time )
    where {i = 0;
           d = 1;
           time = 0 }
 
 --Function to get the next match based on the given date and time
-next_match date time
+next_match date time seed
    | date < 1 || date >30 = putStrLn $ "Enter valid date"
    | index >= 6 = putStrLn $ "No More Matches" 
    | time > 24.00 || time < 0.00 = putStrLn $ "Enter valid time"
-   | otherwise =  print_next_match index ((get_all_matches (draw teams) i d t))
+   | otherwise =  print_next_match index ((get_all_matches (draw teams seed) i d t))
    where {index = (date - 1) * 2 + fromEnum(time > 9.50) + fromEnum(time > 19.50);
           i=0;d=1;t=0}
